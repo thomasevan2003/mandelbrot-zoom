@@ -25,19 +25,20 @@ int main() {
 			double zx = 0.0;
 			double zy = 0.0;
 			int iter = 0;
+			double zmag;
 			while (iter < MAX_ITERATIONS) {
 				++iter;
 				double zx_old = zx;
 				double zy_old = zy;
 				zx = zx_old*zx_old - zy_old*zy_old + cx;
 				zy = 2.0*zx_old*zy_old + cy;
-				double zmag = sqrt(zx*zx + zy*zy);
+				zmag = sqrt(zx*zx + zy*zy);
 				if (zmag > DIVERGED_MAGNITUDE) {
 					break;
 				}
 			}
 			if (iter < MAX_ITERATIONS) {
-				unsigned char colormag = static_cast<unsigned char>(sqrt(static_cast<double>(iter)/static_cast<double>(MAX_ITERATIONS))*255);
+				unsigned char colormag = static_cast<unsigned char>(log(static_cast<double>(iter) + DIVERGED_MAGNITUDE/zmag)/log(static_cast<double>(MAX_ITERATIONS))*255.0);
 				image[(j+i*IMAGE_WIDTH)*3+0] = colormag;
 				image[(j+i*IMAGE_WIDTH)*3+1] = colormag;
 				image[(j+i*IMAGE_WIDTH)*3+2] = colormag;
