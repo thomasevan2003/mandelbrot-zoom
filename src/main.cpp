@@ -6,8 +6,8 @@
 #include <cstring>
 #include <filesystem>
 
-constexpr int IMAGE_WIDTH = 1920;
-constexpr int IMAGE_HEIGHT = 1080;
+constexpr int IMAGE_WIDTH = 1920*2;
+constexpr int IMAGE_HEIGHT = 1080*2;
 constexpr double CX_CENTER = -0.74453986035590838012;
 constexpr double CY_CENTER = 0.12172377389442482241;
 constexpr double HEIGHT = 2.0;
@@ -17,7 +17,8 @@ constexpr double DIVERGED_MAGNITUDE = 2.0;
 constexpr int MAX_ZOOM_EXPONENT = 64;
 constexpr double COLORMAP_SCALE = 0.4;
 constexpr int INITIAL_MAX_ITERATIONS = 1000;
-constexpr int MAX_ITERATIONS_SLOPE = 100;
+constexpr int MAX_ITERATIONS_SLOPE = 1000;
+constexpr int ITERATION_DRAW_OFFSET = 50;
 
 struct RGB {
 	unsigned char r;
@@ -57,9 +58,10 @@ int main() {
 			return -1;
 		}
 	}
-	Stopwatch stopwatch; 
+	Stopwatch total_stopwatch; total_stopwatch.start();
+	Stopwatch iter_stopwatch; 
 	for (int k = 0; k < MAX_ZOOM_EXPONENT; ++k) {
-		stopwatch.start();
+		iter_stopwatch.start();
 		int max_iterations = INITIAL_MAX_ITERATIONS + MAX_ITERATIONS_SLOPE*k;
 		#pragma omp parallel for
 		for (int i = 0; i < IMAGE_HEIGHT; ++i) {
@@ -84,7 +86,7 @@ int main() {
 					}
 				}
 				if (iter < max_iterations) {
-					double colormag = log(static_cast<double>(iter))*COLORMAP_SCALE;
+					double colormag = (log(static_cast<double>(iter+ITERATION_DRAW_OFFSET))-log(static_cast<double>(ITERATION_DRAW_OFFSET)))*COLORMAP_SCALE;
 					image[j+i*IMAGE_WIDTH] = colormap(colormag);
 				}
 			}
@@ -94,8 +96,9 @@ int main() {
 		std::filesystem::path outpath = std::filesystem::path("base-output") / std::filesystem::path(filename); 
 		stbi_write_jpg(outpath.string().c_str(), IMAGE_WIDTH, IMAGE_HEIGHT, 3, reinterpret_cast<unsigned char*>(image), 100);
 		memset(static_cast<void*>(image), 0, IMAGE_WIDTH*IMAGE_HEIGHT*3);
-		std::cout << "(" << k+1 << " / " << MAX_ZOOM_EXPONENT << ")\t" << stopwatch.time() << " seconds" << std::endl;
+		std::cout << "(" << k+1 << " / " << MAX_ZOOM_EXPONENT << ")\t" << iter_stopwatch.time() << " seconds" << std::endl;
 	}
 	delete[] image;
+	std::cout << "total time " << total_stopwatch.time() << " seconds" << std::endl;
 	std::cout << "end of main" << std::endl;
 }
