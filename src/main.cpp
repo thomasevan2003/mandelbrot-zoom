@@ -11,7 +11,7 @@ constexpr double CY_CENTER = 0.0;
 constexpr double HEIGHT = 3.0;
 constexpr double WIDTH = HEIGHT*static_cast<double>(IMAGE_WIDTH)/static_cast<double>(IMAGE_HEIGHT);
 constexpr int MAX_ITERATIONS = 1000;
-constexpr double DIVERGED_MAGNITUDE = 100.0;
+constexpr double DIVERGED_MAGNITUDE = 1000.0;
 
 int main() {
 	std::cout << "start of main" << std::endl;
@@ -25,6 +25,7 @@ int main() {
 			double zx = 0.0;
 			double zy = 0.0;
 			int iter = 0;
+			double zmag_old;
 			double zmag;
 			while (iter < MAX_ITERATIONS) {
 				++iter;
@@ -32,13 +33,16 @@ int main() {
 				double zy_old = zy;
 				zx = zx_old*zx_old - zy_old*zy_old + cx;
 				zy = 2.0*zx_old*zy_old + cy;
-				zmag = sqrt(zx*zx + zy*zy);
+				zmag_old = zmag;
+				double zmag = sqrt(zx*zx + zy*zy);
 				if (zmag > DIVERGED_MAGNITUDE) {
 					break;
 				}
 			}
 			if (iter < MAX_ITERATIONS) {
-				unsigned char colormag = static_cast<unsigned char>(log(static_cast<double>(iter) + DIVERGED_MAGNITUDE/zmag)/log(static_cast<double>(MAX_ITERATIONS))*255.0);
+				unsigned char colormag = static_cast<unsigned char>(log(static_cast<double>(iter) + zmag_old/DIVERGED_MAGNITUDE)
+				                                                    /
+																	log(static_cast<double>(MAX_ITERATIONS))*255.0);
 				image[(j+i*IMAGE_WIDTH)*3+0] = colormag;
 				image[(j+i*IMAGE_WIDTH)*3+1] = colormag;
 				image[(j+i*IMAGE_WIDTH)*3+2] = colormag;
