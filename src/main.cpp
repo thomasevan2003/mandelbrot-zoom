@@ -1,17 +1,46 @@
 #include "stb_image_write.h"
+#include <iostream>
+#include <cmath>
 
-constexpr int IMAGE_WIDTH = 1920;
-constexpr int IMAGE_HEIGHT = 1080;
+constexpr int IMAGE_WIDTH = 5000;
+constexpr int IMAGE_HEIGHT = 3000;
+constexpr double CX_CENTER = -1.0;
+constexpr double CY_CENTER = 0.0;
+constexpr double HEIGHT = 3.0;
+constexpr double WIDTH = HEIGHT*static_cast<double>(IMAGE_WIDTH)/static_cast<double>(IMAGE_HEIGHT);
+constexpr int MAX_ITERATIONS = 500;
+constexpr double DIVERGED_MAGNITUDE = 100.0;
 
 int main() {
-	unsigned char* image = new unsigned char[IMAGE_WIDTH*IMAGE_HEIGHT*4];
+	std::cout << "start of main" << std::endl;
+	unsigned char* image = new unsigned char[IMAGE_WIDTH*IMAGE_HEIGHT*3];
 	for (int i = 0; i < IMAGE_HEIGHT; ++i) {
 		for (int j = 0; j < IMAGE_WIDTH; ++j) {
-			image[(j+IMAGE_WIDTH*i)*4] = static_cast<unsigned char>(static_cast<float>(j)/static_cast<float>(IMAGE_WIDTH)*255.0f);
-			image[(j+IMAGE_WIDTH*i)*4+1] = static_cast<unsigned char>(static_cast<float>(i)/static_cast<float>(IMAGE_HEIGHT)*255.0f);
-			image[(j+IMAGE_WIDTH*i)*4+3] = 255;
+			double cx = CX_CENTER + static_cast<double>(j)/static_cast<double>(IMAGE_WIDTH)*WIDTH - WIDTH/2.0;
+			double cy = CY_CENTER + static_cast<double>(i)/static_cast<double>(IMAGE_HEIGHT)*HEIGHT - HEIGHT/2.0;
+			double zx = 0.0;
+			double zy = 0.0;
+			int iter = 0;
+			while (iter < MAX_ITERATIONS) {
+				++iter;
+				double zx_old = zx;
+				double zy_old = zy;
+				zx = zx_old*zx_old - zy_old*zy_old + cx;
+				zy = 2.0*zx_old*zy_old + cy;
+				if (zx*zx + zy*zy > DIVERGED_MAGNITUDE*DIVERGED_MAGNITUDE) {
+					break;
+				}
+			}
+			if (iter < MAX_ITERATIONS) {
+				unsigned char colormag = static_cast<unsigned char>(sqrt(static_cast<double>(iter)/static_cast<double>(MAX_ITERATIONS))*255);
+				image[(j+i*IMAGE_WIDTH)*3+0] = colormag;
+				image[(j+i*IMAGE_WIDTH)*3+1] = colormag;
+				image[(j+i*IMAGE_WIDTH)*3+2] = colormag;
+			}
 		}
+		std::cout << "row " << i << " of " << IMAGE_WIDTH << std::endl;
 	}
-	stbi_write_bmp("test.bmp", IMAGE_WIDTH, IMAGE_HEIGHT, 4, image);
+	stbi_write_bmp("test.bmp", IMAGE_WIDTH, IMAGE_HEIGHT, 3, image);
 	delete[] image;
+	std::cout << "end of main" << std::endl;
 }
