@@ -9,8 +9,8 @@
 #include "set_map_format.hpp"
 
 constexpr int FRAMES_PER_SETMAP = 30;
-constexpr int IMAGE_WIDTH = 1920*2;
-constexpr int IMAGE_HEIGHT = 1080*2;
+constexpr int IMAGE_WIDTH = 1920;
+constexpr int IMAGE_HEIGHT = 1080;
 constexpr double COLORMAP_SCALE = 0.4;
 constexpr int ITERATION_DRAW_OFFSET = 50;
 
@@ -93,33 +93,20 @@ int main() {
 			#pragma omp parallel for
 			for (int i = 0; i < IMAGE_HEIGHT; ++i) {
 				for (int j = 0; j < IMAGE_WIDTH; ++j) {
-					/*int mlow = (static_cast<double>(i)-i_center)/static_cast<double>(IMAGE_HEIGHT)*static_cast<double>(header.height)*zoom_factor + m_center;
-					int nlow = (static_cast<double>(j)-j_center)/static_cast<double>(IMAGE_WIDTH)*static_cast<double>(header.width)*zoom_factor + n_center;
-					int mhigh = (static_cast<double>(i+1)-i_center)/static_cast<double>(IMAGE_HEIGHT)*static_cast<double>(header.height)*zoom_factor + m_center;
-					int nhigh = (static_cast<double>(j+1)-j_center)/static_cast<double>(IMAGE_WIDTH)*static_cast<double>(header.width)*zoom_factor + n_center;
-					double colormag = 0.0;
-					int in_set_count = 0;
-					int pixel_count = 0;
-					for (int m = mlow; m < std::max(mhigh, mlow+1); ++m) {
-						for (int n = nlow; n < std::max(nhigh, nlow+1); ++n) {
-							int iter = setmap[n+header.width*m].iterations;
-							if (iter < header.max_iterations) {
-								colormag += (log(static_cast<double>(iter+ITERATION_DRAW_OFFSET))-log(static_cast<double>(ITERATION_DRAW_OFFSET)))*COLORMAP_SCALE;
-							} else {
-								++in_set_count;
-							}
-							++pixel_count;
-						}
-					}
-					image[j+i*IMAGE_WIDTH] = colormap(colormag/static_cast<double>(pixel_count)); 
-					double in_set_multiplier = (1.0 - static_cast<double>(in_set_count)/static_cast<double>(pixel_count));
-					image[j+i*IMAGE_WIDTH] = { static_cast<unsigned char>(static_cast<double>(image[j+i*IMAGE_WIDTH].r)*in_set_multiplier),
-											   static_cast<unsigned char>(static_cast<double>(image[j+i*IMAGE_WIDTH].g)*in_set_multiplier),
-											   static_cast<unsigned char>(static_cast<double>(image[j+i*IMAGE_WIDTH].b)*in_set_multiplier) };*/
 					int m = (static_cast<double>(i)-i_center)/static_cast<double>(IMAGE_HEIGHT)*static_cast<double>(header.height)*zoom_factor + m_center;
 					int n = (static_cast<double>(j)-j_center)/static_cast<double>(IMAGE_WIDTH)*static_cast<double>(header.width)*zoom_factor + n_center;
 					if (setmap[n+m*header.width].iterations < header.max_iterations) {
-						double colormag = (log(static_cast<double>(setmap[n+m*header.width].iterations+ITERATION_DRAW_OFFSET))-log(static_cast<double>(ITERATION_DRAW_OFFSET)))*COLORMAP_SCALE;
+						int iter = setmap[n+m*header.width].iterations;
+						if (m < header.height - 1) {
+							iter = std::min(iter, setmap[n+(m+1)*header.width].iterations);
+						}
+						if (n < header.width - 1) {
+							iter = std::min(iter, setmap[n+1+m*header.width].iterations);
+						}
+						if (n < header.width - 1 && m < header.height - 1) {
+							iter = std::min(iter, setmap[n+1*(m+1)*header.width].iterations);
+						}
+						double colormag = (log(static_cast<double>(iter+ITERATION_DRAW_OFFSET))-log(static_cast<double>(ITERATION_DRAW_OFFSET)))*COLORMAP_SCALE;
 						image[j+i*IMAGE_WIDTH] = colormap(colormag);
 					} else {
 						image[j+i*IMAGE_WIDTH] = {0,0,0};

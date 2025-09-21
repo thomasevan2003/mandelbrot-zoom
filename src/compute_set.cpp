@@ -7,8 +7,8 @@
 #include <fstream>
 #include "set_map_format.hpp"
 
-constexpr int IMAGE_WIDTH = 1920*4;
-constexpr int IMAGE_HEIGHT = 1080*4;
+constexpr int IMAGE_WIDTH = 1920;
+constexpr int IMAGE_HEIGHT = 1080;
 constexpr double CX_CENTER = -0.74453986035590838012;
 constexpr double CY_CENTER = 0.12172377389442482241;
 constexpr double HEIGHT = 2.0;
