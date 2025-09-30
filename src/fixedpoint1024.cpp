@@ -34,7 +34,7 @@ fixedpoint1024::fixedpoint1024(double x) {
 	}
 	// below underflow value - set to 0
 	if (exponent <= point_position - value_bits) {
-		memcpy((void*)this, 0, total_bits/8);
+		memset((void*)this, 0, total_bits/8);
 		return;
 	}		
 	
