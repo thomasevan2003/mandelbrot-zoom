@@ -8,14 +8,12 @@
 #include "set_map_format.hpp"
 #include "fixedpoint1024.hpp"
 
-constexpr int IMAGE_WIDTH = 1920;
-constexpr int IMAGE_HEIGHT = 1080;
-constexpr double CX_CENTER = -0.74453986035590838012;
-constexpr double CY_CENTER = 0.12172377389442482241;
+constexpr int IMAGE_WIDTH = 192;
+constexpr int IMAGE_HEIGHT = 108;
 constexpr double HEIGHT = 2.0;
 constexpr double WIDTH = HEIGHT*static_cast<double>(IMAGE_WIDTH)/static_cast<double>(IMAGE_HEIGHT);
 constexpr double DIVERGED_MAGNITUDE = 2.0;
-constexpr int MAX_ZOOM_EXPONENT = 64;
+constexpr int MAX_ZOOM_EXPONENT = 128;
 constexpr int INITIAL_MAX_ITERATIONS = 1000;
 constexpr int MAX_ITERATIONS_SLOPE = 1000;
 
@@ -28,6 +26,10 @@ int main() {
 			return -1;
 		}
 	}
+	fixedpoint1024 two(2.0);
+	fixedpoint1024 cx_center("-0.74453986035590838011");
+	fixedpoint1024 cy_center("0.12172377389442482241");
+	fixedpoint1024 diverged_magnitude_squared(DIVERGED_MAGNITUDE*DIVERGED_MAGNITUDE);
 	Stopwatch total_stopwatch; total_stopwatch.start();
 	Stopwatch iter_stopwatch; 
 	for (int k = 0; k < MAX_ZOOM_EXPONENT; ++k) {
@@ -42,20 +44,22 @@ int main() {
 		#pragma omp parallel for
 		for (int i = 0; i < IMAGE_HEIGHT; ++i) {
 			for (int j = 0; j < IMAGE_WIDTH; ++j) {
-				double cx = CX_CENTER + pow(2.0,-static_cast<double>(k))*(static_cast<double>(j)/static_cast<double>(IMAGE_WIDTH)*WIDTH - WIDTH/2.0);
-				double cy = CY_CENTER + pow(2.0,-static_cast<double>(k))*(static_cast<double>(i)/static_cast<double>(IMAGE_HEIGHT)*HEIGHT - HEIGHT/2.0);
-				double zx = 0.0;
-				double zy = 0.0;
+				fixedpoint1024 dx(pow(2.0,-static_cast<double>(k))*(static_cast<double>(j)/static_cast<double>(IMAGE_WIDTH)*WIDTH - WIDTH/2.0));
+				fixedpoint1024 dy(pow(2.0,-static_cast<double>(k))*(static_cast<double>(i)/static_cast<double>(IMAGE_HEIGHT)*HEIGHT - HEIGHT/2.0));
+				fixedpoint1024 cx = cx_center + dx;
+				fixedpoint1024 cy = cy_center + dy;
+				fixedpoint1024 zx;
+				fixedpoint1024 zy;
 				int iter = 0;
-				double zmag = sqrt(zx*zx + zy*zy);
+				fixedpoint1024 zmag;
 				while (iter < max_iterations) {
 					++iter;
-					double zx_old = zx;
-					double zy_old = zy;
-					zx = zx_old*zx_old - zy_old*zy_old + cx;
-					zy = 2.0*zx_old*zy_old + cy;
-					zmag = sqrt(zx*zx + zy*zy);
-					if (zmag > DIVERGED_MAGNITUDE) {
+					fixedpoint1024 zx_old = zx;
+					fixedpoint1024 zy_old = zy;
+					zx = zx_old*zx_old + (-zy_old*zy_old) + cx;
+					zy = two*zx_old*zy_old + cy;
+					zmag = zx*zx + zy*zy;
+					if (zmag > diverged_magnitude_squared) {
 						break;
 					}
 				}

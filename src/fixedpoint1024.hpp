@@ -31,7 +31,7 @@ class fixedpoint1024 {
 	private:
 
 		static constexpr int point_position = 32; // position of decimal point (number of bits to the left of the point)
-		static constexpr int total_bits = 128; // total size of the class
+		static constexpr int total_bits = 1024; // total size of the class
 		static constexpr int value_bits = total_bits - sizeof(fixedpoint1024_header)*8; // size of the value portion of the class
 		static constexpr int num_blocks = value_bits/32; // number of 32 bit blocks
 

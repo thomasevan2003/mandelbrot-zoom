@@ -12,6 +12,10 @@ fixedpoint1024::fixedpoint1024(double x) {
 	
 	memset((void*)this, 0, total_bits/8);
 	
+	if (x == 0.0) {
+		return;
+	}
+	
 	// extract sign bit
 	uint64_t sign;
 	memcpy((void*)&sign, (const void*)&x, sizeof(double)); 
@@ -282,18 +286,12 @@ fixedpoint1024 fixedpoint1024::operator*(const fixedpoint1024& other) const {
 	}
 	
 	uint64_t overflowed_block = 0x0ull;
-	for (int i = 0; i < num_half_blocks; ++i) {
-		std::cout << this_value[i] << '\t' << other_value[i] << std::endl;
-	}
 	for (int i = num_half_blocks-1; i >= 0; --i) {
 		const int minj = std::max(0, i-num_half_blocks+2);
 		const int maxj = std::min(num_half_blocks-1, i+1);
-		std::cout << overflowed_block << '\t';
 		for (int j = minj; j <= maxj; ++j) {
-			std::cout << j << i-j+1 << ' ';
 			overflowed_block = overflowed_block + static_cast<uint64_t>(this_value[j])*static_cast<uint64_t>(other_value[i-j+1]);
 		}
-		std::cout << std::endl;
 		out_value[i] = static_cast<uint16_t>(overflowed_block);
 		overflowed_block = overflowed_block >> 16;
 	}
