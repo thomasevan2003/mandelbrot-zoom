@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <fstream>
 #include "set_map_format.hpp"
+#include "fixedpoint1024.hpp"
 
 constexpr int IMAGE_WIDTH = 1920;
 constexpr int IMAGE_HEIGHT = 1080;

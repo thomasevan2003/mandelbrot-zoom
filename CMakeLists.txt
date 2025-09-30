@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(COMPUTE_SET_SOURCES
 	src/compute_set.cpp
 	src/Stopwatch.cpp
+	src/fixedpoint1024.cpp
 )
 set(GENERATE_FRAMES_SOURCES
 	src/generate_frames.cpp
