@@ -175,10 +175,21 @@ fixedpoint1024 fixedpoint1024::operator-() const {
 }
 
 fixedpoint1024 fixedpoint1024::operator+(const fixedpoint1024& other) const {
+	return addition_subtraction_driver(other, false);
+}
+
+fixedpoint1024 fixedpoint1024::operator-(const fixedpoint1024& other) const {
+	return addition_subtraction_driver(other, true);
+}
+
+inline fixedpoint1024 fixedpoint1024::addition_subtraction_driver(const fixedpoint1024& other, bool subtract) const {
 	fixedpoint1024 out;
 	memset((void*)&out, 0, total_bits/8);
 	bool first_sign = this->header.flags.sign;
 	bool same_sign = first_sign == other.header.flags.sign;
+	if (subtract) {
+		same_sign = !same_sign;
+	}
 	// if same sign, add from last digit to first, carrying digit as necessary
 	if (same_sign) {
 		out.header.flags.sign = first_sign;

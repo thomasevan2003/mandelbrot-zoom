@@ -27,6 +27,7 @@ class fixedpoint1024 {
 		fixedpoint1024 times_2() const;
 		fixedpoint1024 operator-() const;
 		fixedpoint1024 operator+(const fixedpoint1024& other) const;
+		fixedpoint1024 operator-(const fixedpoint1024& other) const;
 		fixedpoint1024 operator*(const fixedpoint1024& other) const;
 		bool operator>(const fixedpoint1024& other) const;
 	
@@ -39,6 +40,8 @@ class fixedpoint1024 {
 
 		fixedpoint1024_header header;
 		uint32_t value[num_blocks];
+		
+		inline fixedpoint1024 addition_subtraction_driver(const fixedpoint1024& other, bool subtract) const;
 	
 };
 

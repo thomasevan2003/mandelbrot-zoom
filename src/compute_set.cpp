@@ -53,7 +53,7 @@ int main() {
 					++iter;
 					fixedpoint1024 zx_old = zx;
 					fixedpoint1024 zy_old = zy;
-					zx = zx_old*zx_old + (-zy_old*zy_old) + cx;
+					zx = zx_old*zx_old - zy_old*zy_old + cx;
 					zy = (zx_old*zy_old).times_2() + cy;
 					double zx_truncated = zx.truncated_double();
 					double zy_truncated = zy.truncated_double();
