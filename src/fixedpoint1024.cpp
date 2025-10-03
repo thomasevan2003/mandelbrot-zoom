@@ -326,3 +326,11 @@ fixedpoint1024 fixedpoint1024::times_2() const {
 	
 	return out;
 }
+
+double fixedpoint1024::truncated_double() const {
+	double out = static_cast<double>(this->value[0]);
+	if (this->header.flags.sign) {
+		out *= -1.0;
+	}
+	return out;
+}

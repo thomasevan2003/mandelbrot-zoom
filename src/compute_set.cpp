@@ -28,7 +28,6 @@ int main() {
 	}
 	fixedpoint1024 cx_center("-0.74453986035590838011");
 	fixedpoint1024 cy_center("0.12172377389442482241");
-	fixedpoint1024 diverged_magnitude(DIVERGED_MAGNITUDE);
 	Stopwatch total_stopwatch; total_stopwatch.start();
 	Stopwatch iter_stopwatch; 
 	for (int k = 0; k < MAX_ZOOM_EXPONENT; ++k) {
@@ -56,7 +55,9 @@ int main() {
 					fixedpoint1024 zy_old = zy;
 					zx = zx_old*zx_old + (-zy_old*zy_old) + cx;
 					zy = (zx_old*zy_old).times_2() + cy;
-					if (zx > diverged_magnitude || -zx > diverged_magnitude || zy > diverged_magnitude || -zy > diverged_magnitude) {
+					double zx_truncated = zx.truncated_double();
+					double zy_truncated = zy.truncated_double();
+					if (zx_truncated*zx_truncated + zy_truncated*zy_truncated > DIVERGED_MAGNITUDE*DIVERGED_MAGNITUDE) {
 						break;
 					}
 				}
