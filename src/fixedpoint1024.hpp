@@ -23,6 +23,7 @@ class fixedpoint1024 {
 		fixedpoint1024(double x);
 		fixedpoint1024(std::string s);
 		std::string string_binary();
+		fixedpoint1024 times_2() const;
 		fixedpoint1024 operator-() const;
 		fixedpoint1024 operator+(const fixedpoint1024& other) const;
 		fixedpoint1024 operator*(const fixedpoint1024& other) const;

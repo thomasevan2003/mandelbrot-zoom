@@ -26,7 +26,6 @@ int main() {
 			return -1;
 		}
 	}
-	fixedpoint1024 two(2.0);
 	fixedpoint1024 cx_center("-0.74453986035590838011");
 	fixedpoint1024 cy_center("0.12172377389442482241");
 	fixedpoint1024 diverged_magnitude(DIVERGED_MAGNITUDE);
@@ -56,7 +55,7 @@ int main() {
 					fixedpoint1024 zx_old = zx;
 					fixedpoint1024 zy_old = zy;
 					zx = zx_old*zx_old + (-zy_old*zy_old) + cx;
-					zy = two*zx_old*zy_old + cy;
+					zy = (zx_old*zy_old).times_2() + cy;
 					if (zx > diverged_magnitude || -zx > diverged_magnitude || zy > diverged_magnitude || -zy > diverged_magnitude) {
 						break;
 					}

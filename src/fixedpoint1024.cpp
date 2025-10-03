@@ -310,3 +310,18 @@ fixedpoint1024 fixedpoint1024::operator*(const fixedpoint1024& other) const {
 	return out;
 	
 }
+
+fixedpoint1024 fixedpoint1024::times_2() const {
+	
+	fixedpoint1024 out;
+	
+	memset((void*)out.value, 0, value_bits/8);
+	
+	for (int i = 0; i < num_blocks-1; ++i) {
+		out.value[i] = (this->value[i] << 1);
+		out.value[i] = out.value[i] | ((this->value[i+1] >> 31) & 0x1ul);
+	}
+	out.value[num_blocks-1] = (this->value[num_blocks-1] << 1);
+	
+	return out;
+}
