@@ -8,8 +8,8 @@
 #include "set_map_format.hpp"
 #include "fixedpoint1024.hpp"
 
-constexpr int IMAGE_WIDTH = 192;
-constexpr int IMAGE_HEIGHT = 108;
+constexpr int IMAGE_WIDTH = 192/4;
+constexpr int IMAGE_HEIGHT = 108/4;
 constexpr double HEIGHT = 2.0;
 constexpr double WIDTH = HEIGHT*static_cast<double>(IMAGE_WIDTH)/static_cast<double>(IMAGE_HEIGHT);
 constexpr double DIVERGED_MAGNITUDE = 2.0;
