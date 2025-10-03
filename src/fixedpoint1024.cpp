@@ -316,6 +316,7 @@ fixedpoint1024 fixedpoint1024::times_2() const {
 	fixedpoint1024 out;
 	
 	memset((void*)out.value, 0, value_bits/8);
+	out.header = this->header;
 	
 	for (int i = 0; i < num_blocks-1; ++i) {
 		out.value[i] = (this->value[i] << 1);
