@@ -71,7 +71,7 @@ fixedpoint1024::fixedpoint1024(double x) {
 	}
 }
 
-fixedpoint1024::fixedpoint1024(std::string s) {
+fixedpoint1024::fixedpoint1024(std::string_view s) {
 	
 	memset((void*)this, 0, total_bits/8);
 	
@@ -142,7 +142,7 @@ fixedpoint1024::fixedpoint1024(std::string s) {
 	
 }
 
-std::string fixedpoint1024::string_binary() {
+std::string fixedpoint1024::string_binary() const {
 	if (header.flags.inf) {
 		if (header.flags.sign) {
 			return "-inf";
@@ -320,6 +320,53 @@ fixedpoint1024 fixedpoint1024::operator*(const fixedpoint1024& other) const {
 	
 	return out;
 	
+}
+
+fixedpoint1024 fixedpoint1024::squared() const {
+	fixedpoint1024 out;
+	memset((void*)&out, 0, total_bits/8);
+	
+	const uint16_t* this_source = reinterpret_cast<const uint16_t*>(&this->value);
+	uint16_t* out_source = reinterpret_cast<uint16_t*>(out.value);
+	
+	const int num_half_blocks = num_blocks*2;
+	
+	uint16_t this_value[num_half_blocks];
+	uint16_t out_value[num_half_blocks];
+	
+	for (int i = 0; i < num_blocks; ++i) {
+		int first = 2*i;
+		int second = 2*i+1;
+		this_value[first] = this_source[second];
+		this_value[second] = this_source[first];
+	}
+	
+	uint64_t overflowed_block = 0x0ull;
+	for (int i = num_half_blocks-1; i >= 0; --i) {
+		const int minj = std::max(0, i-num_half_blocks+2);
+		const int maxj = std::min(num_half_blocks-1, i+1);
+		for (int j = minj; j <= (maxj-1)/2; ++j) {
+			overflowed_block = overflowed_block + 0x2ll*static_cast<uint64_t>(this_value[j])*static_cast<uint64_t>(this_value[maxj-j-minj]);
+		}
+		if (i % 2 != 0) {
+			uint64_t middle_value = static_cast<uint64_t>(this_value[(i+1)/2]);
+			overflowed_block = overflowed_block + middle_value*middle_value;
+		}
+		out_value[i] = static_cast<uint16_t>(overflowed_block);
+		overflowed_block = overflowed_block >> 16;
+	}
+	
+	for (int i = 0; i < num_blocks; ++i){
+		int first = 2*i;
+		int second = 2*i+1;
+		out_source[first] = out_value[second];
+		out_source[second] = out_value[first];
+	}
+	
+	if (overflowed_block > 0) {
+		out.header.flags.inf = true;
+	}
+	return out;
 }
 
 fixedpoint1024 fixedpoint1024::times_2() const {

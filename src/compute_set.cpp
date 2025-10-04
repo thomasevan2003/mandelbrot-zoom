@@ -16,6 +16,8 @@ constexpr double DIVERGED_MAGNITUDE = 2.0;
 constexpr int MAX_ZOOM_EXPONENT = 128;
 constexpr int INITIAL_MAX_ITERATIONS = 1000;
 constexpr int MAX_ITERATIONS_SLOPE = 1000;
+constexpr std::string_view cx_guess = "-0.74453986035590838011";
+constexpr std::string_view cy_guess = "0.12172377389442482241";
 
 int main() {
 	std::cout << "start of main" << std::endl;
@@ -26,8 +28,8 @@ int main() {
 			return -1;
 		}
 	}
-	fixedpoint1024 cx_center("-0.74453986035590838011");
-	fixedpoint1024 cy_center("0.12172377389442482241");
+	fixedpoint1024 cx_center(cx_guess);
+	fixedpoint1024 cy_center(cy_guess);
 	Stopwatch total_stopwatch; total_stopwatch.start();
 	Stopwatch iter_stopwatch; 
 	for (int k = 0; k < MAX_ZOOM_EXPONENT; ++k) {
@@ -53,7 +55,7 @@ int main() {
 					++iter;
 					fixedpoint1024 zx_old = zx;
 					fixedpoint1024 zy_old = zy;
-					zx = zx_old*zx_old - zy_old*zy_old + cx;
+					zx = zx_old.squared() - zy_old.squared() + cx;
 					zy = (zx_old*zy_old).times_2() + cy;
 					double zx_truncated = zx.truncated_double();
 					double zy_truncated = zy.truncated_double();
